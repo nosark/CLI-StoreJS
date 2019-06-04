@@ -49,3 +49,30 @@ test('Testing Store.getNumOccurences()', () => {
   const val = store.getValue('123');
   expect(val).toBe(null);
 });
+
+test('Testing Store.delete()', () => {
+  const store = new Store();
+
+  store.set('abc', 123);
+  store.set('123', 6);
+  store.set('333', 6);
+  store.set('464', 6);
+
+  const tableSize = Object.keys(store.table).length;
+  expect(tableSize).toBe(4);
+
+  
+  store.delete('abc');
+  const ts = Object.keys(store.table).length;
+  expect(ts).toBe(3);
+
+  store.delete('123');
+  const keyExists = store.getValue('123');
+  expect(keyExists).toBe(null);
+
+  store.delete('333');
+  expect(store.getValue('333')).toBe(null);
+
+  store.delete('464');
+  expect(Object.keys(store.table).length).toBe(0);
+});
