@@ -1,4 +1,4 @@
-
+const { CommandItem } = require('./command_item');
 
 class Store {
   constructor() {
@@ -8,7 +8,7 @@ class Store {
     this.transactionStack = []; 
 
     //keeps track of values from key duplicates etc allowing us to restore previous values
-    this.previousTransactionValues = []; 
+    //this.previousTransactionValues = []; 
     // hash table used to store values in.
     this.table = {};
   }
@@ -38,13 +38,18 @@ class Store {
   }
 
   // adds key value pair to the store using 'SET' command
+  //TODO: add Command Item as argument
+  // retrieve previous table if it exists add it to CommandItem
+  // and push item to transaction stack.
   set(key, value) {
     this.table[key] = value;
-    // TODO: handle duplicates and rollbacks later
   }
   
   // deletes key value pair from the table using 'DELETE'
-  // command. TODO: take rollbacks into account 
+  // command.
+    //TODO: add Command Item as argument
+    // retrieve previous table if it exists add it to CommandItem
+    // and push item to transaction stack.
   delete(key) {
     if (key in this.table) {
       delete this.table[key];
@@ -55,12 +60,44 @@ class Store {
 
   // commits all transactions in the transaction stack in memory
   // using 'COMMIT' command.
-  commit() {
-    //TODO:
+  commit(queue) {
+    //TODO: Process the commit queue and put items in the table.
+    //when setting and deleting we must retrieve the previous value
+    //if it exists before set or delete is executed!
+    // use shift method to process queue
+    while(queue.length !== 0) {
+      const item = queue.shift();
+      switch(item.command) {
+        case 'BEGIN':
+          //push item to the stack to allow nested rollbacks.
+          this.transactionStack.push(item);
+          break;
+        case 'SET':
+          //first retrieve old value if it exists
+          item.previousTableValue = this.getValue(item.key);
+          //push item to the transaction stack.
+          this.transactionStack.push(item);
+          //commit item to table by executing command.
+          this.set(item.key, item.value);
+          break;
+        case 'DELETE':
+          //first retrieve old value if it exists
+          item.previousTableValue = this.getValue(item.key);
+          //push item to the transaction stack.
+          this.transactionStack.push(item);
+          //commit item to table by executing command.
+          this.delete(item.key);
+          break;
+        
+        default:
+          console.log('improper command made it to the queue');
+      }
+    }
   }
 
   // rollsback to the last version of the table before the last
   // 'BEGIN' command.
+  //TODO: handle previous values and stack with Command Item in mind.
   rollback() {
     if (this.transactionStack.length === 0) {
       console.log(`There is nothing to rollback!`); 
@@ -69,6 +106,7 @@ class Store {
 
     //work through the transaction stack and previous values
     // stack and restore values to previous BEGIN Command
+    //TODO: check for begin command to allow for nested rollbacks
     while (transactionStack.length > 0) {
       const stackItem = this.transactionStack.pop();
       const previousValue = this.previousTransactionValues.pop();
@@ -86,20 +124,13 @@ class Store {
     console.log(`Rollback Complete!`);
   }
 
-  // NOTE: function may have no purpose.
-  // TODO: begin initiates tracking each transaction 
-  /*
-  begin() {
-
-  }
-  */
-
   // Removes transaction and previous value histories by
   // emptying both Store(this) objects stacks
   flushTransactionHistory() {
     this.transactionStack = [];
     this.previousTransactionValues = [];
   }
+
 }
 
 module.exports =  { Store };

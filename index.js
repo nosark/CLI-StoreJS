@@ -1,5 +1,7 @@
 
 const { Store } = require('./src/store');
+const { CommandItem } = require('./src/command_item');
+
 const rl = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
@@ -9,41 +11,57 @@ const store = new Store();
 console.log('Welcome to StoreJS, the library to meet all of your key value pair needs!');
 console.log('StoreJS uses a CLI interface with the following format: \n <command> <key> <value> \n EX: SET abc 123\n');
 console.log('Type QUIT at any time to end the program. :)');
+console.log('Type --help for a list of commands. :) Happy Coding!');
 
-//TODO: Check to see if you could restore states using Begin commands and 
+//TODO: Check to see if you could restore states using Begin commands and
 // have a deep rollback system that can handle multiple successive rollback 
 // commands.
 
-// const commitQueue = [];
+
+// for restoring store state we only need to add Set and Delete Items to the
+// Queue. add begin so we can easily push it to the transaction stack 
+// and handle nested rollbacks.
 // recursively prompt the user with commands until the QUIT
 // command is entered.
+
+const commitQueue = [];
+//TODO: implement queue logic with set and delete objects and eliminate 
+// the previousValueStack with commandItem object.
 const main = () => {
   rl.question('What would you like to do? ', (command) => {
     const com = command.trim().split(' ');
-   
+    let commandItem;
+    if (com[0] === 'SET' || com[0] === 'DELETE') {
+      commandItem = new CommandItem(com[0], com[1], com[2]);
+    } else if (com[0] === 'BEGIN') {
+      commandItem = new CommandItem(com[0], null, null);
+    }
+    
     switch(com[0]) {
-      case "SET":
-        store.set(com[1], com[2]);
+      case 'SET':
+        commitQueue.push(commandItem);
+        // store.set(com[1], com[2]);
         break;
       case 'GET':
         store.getValue(com[1]);
         break;
       case 'DELETE':
-        store.delete(com[1]);
+        commitQueue.push(commandItem);
+        // store.delete(com[1]);
         break;
       case 'COMMIT':
-       //TODO: store.commit();
+        store.commit();
        break;
       case 'BEGIN':
-        store.flushTransactionHistory();
+        // store.flushTransactionHistory();
         //then make sure you're building the stacks 
         // as commands come out.
-        //TODO: store.begin();
+        commitQueue.push(commandItem);
       break;
       case 'ROLLBACK':
       //TODO: store.rollback();
       break;
-      case "QUIT":
+      case 'QUIT':
         console.log('quit');
         process.exit(0);
         break;
