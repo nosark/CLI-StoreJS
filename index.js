@@ -4,7 +4,8 @@ const { CommandItem } = require('./src/command_item');
 
 const rl = require('readline').createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
+  terminal : false
 });
 
 const store = new Store();
@@ -13,20 +14,14 @@ console.log('StoreJS uses a CLI interface with the following format: \n <command
 console.log('Type QUIT at any time to end the program. :)');
 console.log('Type --help for a list of commands. :) Happy Coding!');
 
-//TODO: Check to see if you could restore states using Begin commands and
-// have a deep rollback system that can handle multiple successive rollback 
-// commands.
-
-
-// for restoring store state we only need to add Set and Delete Items to the
-// Queue. add begin so we can easily push it to the transaction stack 
+// For restoring store state we only need to add Set and Delete Items to the
+// Queue.We add BEGIN to the queue so we can easily push it to the transaction stack 
 // and handle nested rollbacks.
 // recursively prompt the user with commands until the QUIT
 // command is entered.
 
 const commitQueue = [];
-//TODO: implement queue logic with set and delete objects and eliminate 
-// the previousValueStack with commandItem object.
+
 const main = () => {
   rl.question('What would you like to do? ', (command) => {
     const com = command.trim().split(' ');
@@ -40,27 +35,23 @@ const main = () => {
     switch(com[0]) {
       case 'SET':
         commitQueue.push(commandItem);
-        // store.set(com[1], com[2]);
         break;
       case 'GET':
-        store.getValue(com[1]);
+        const val = store.getValue(com[1]);
+        console.log(`=> ${val}`);
         break;
       case 'DELETE':
         commitQueue.push(commandItem);
-        // store.delete(com[1]);
         break;
       case 'COMMIT':
-        store.commit();
+        store.commit(commitQueue);
        break;
       case 'BEGIN':
-        // store.flushTransactionHistory();
-        //then make sure you're building the stacks 
-        // as commands come out.
         commitQueue.push(commandItem);
-      break;
+        break;
       case 'ROLLBACK':
-      //TODO: store.rollback();
-      break;
+        store.rollback(commitQueue, rl);
+        break;
       case 'QUIT':
         console.log('quit');
         process.exit(0);

@@ -30,7 +30,3 @@ class CommandItem {
   }
 }
 module.exports = { CommandItem };
-
-//TODO: contemplating inline objects on the fly versus 
-//classes for set and delete items 
-//NOTE: This is where you left off.
