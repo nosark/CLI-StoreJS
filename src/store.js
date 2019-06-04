@@ -1,10 +1,7 @@
 const { CommandItem } = require('./command_item');
 
-// const readl = require('readline').createInterface({
-//   input: process.stdin,
-//   output: process.stdout
-// });
-
+// Store is a Key:Value Store with the ability to rollback it's state
+// using a transaction stack as a history keeper.
 class Store {
   constructor() {
     // the transaction stack will keep track of
@@ -40,18 +37,12 @@ class Store {
   }
 
   // adds key value pair to the store using 'SET' command
-  //TODO: add Command Item as argument
-  // retrieve previous table if it exists add it to CommandItem
-  // and push item to transaction stack.
   set(key, value) {
     this.table[key] = value;
   }
   
   // deletes key value pair from the table using 'DELETE'
   // command.
-    //TODO: add Command Item as argument
-    // retrieve previous table if it exists add it to CommandItem
-    // and push item to transaction stack.
   delete(key) {
     if (key in this.table) {
       delete this.table[key];
@@ -62,7 +53,7 @@ class Store {
 
   // commits all items in the commandQueue to the table
   //while also storing the transaction history.
-  //Process the commit queue and put items in the table.
+  //Process the commit queue and puts items in the table.
   //when setting and deleting we must retrieve the previous value
   //if it exists before set or delete is executed!
   commit(queue) {
@@ -99,47 +90,41 @@ class Store {
 
   // rollsback to the last version of the table before the last
   // 'BEGIN' command.
-  //TODO: handle previous values and stack with Command Item in mind.
   rollback(queue, readlineInterface) {
     if (this.transactionStack.length === 0) {
       console.log(`There is no history to rollback! \n` + 
-        `If you continue, you are going to empty the transaction queue.\n`);
+        `transaction queue emptied.\n`);
+        queue = [];
     }
     //BUG: question has unexpected behavior, but all other logic is good atm.
-    //     readlineInterface.question(`Would you like to continue? (yes / no)`, (answer) => {
-    //       switch(answer) {
-    //         case 'yes':
-    //           queue = [];
-    //           break;
-    //         case 'no':
-    //           return;
-  
-    //         default:
-    //           console.log('Please answer yes or no!');
-    //       }
-    //     });
-    //   queue = [];
-    //   return;
-    // }
-
     // const rollbackPrompt = `You have selected ROLLBACK, once this transaction is executed\n` +
     //   `it will restore the table to the previous state before beginning\n` +
     //   `this transaction sequence.\n` +
     //   `Would you like to continue? (yes / no)`;
-    // //console.log(rollbackPrompt);
+
     // readlineInterface.question(rollbackPrompt, (answer) => {
     //   switch(answer) {
     //     case 'yes':
+    //       this.execRollback(queue);
     //       break;
     //     case 'no':
-    //       return;
+    //       break;
+        
+    //     default: 
+    //       console.log(`The answer you have provided is incorrect, please respond yes or no.`);
     //   }
     // });
+    this.execRollback(queue);
+    return;
+  }
 
-    console.log('reached past questions');
+  // helper function to rollback(), this function does all the work
+  // traverses the stack by popping off an item at a time, restores the 
+  //Store to it's last state at the first reached BEGIN command, they work 
+  // like bookmarks. you can restore the Store State all the way to zero. 
+  execRollback(queue) {
     //Work through the transaction stack and restore values to 
     //previous BEGIN Command
-    //TODO: check for begin command to allow for nested rollbacks
     while (this.transactionStack.length > 0) {
       const stackItem = this.transactionStack.pop();
       if(stackItem.getCommandType() === 'BEGIN') {
@@ -162,20 +147,12 @@ class Store {
         }
       } else {
         console.log(`rollback does not need to handle this command state...`);
-        //continue;
+        continue;
       }
+      queue = [];
     }
 
     console.log(`Rollback Complete! Transaction History Empty!`);
   }
-
-  // Removes transaction and previous value histories by
-  // emptying both Store(this) objects stacks
-  flushTransactionHistory() {
-    this.transactionStack = [];
-    this.previousTransactionValues = [];
-  }
-
 }
-
 module.exports =  { Store };

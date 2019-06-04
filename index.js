@@ -15,7 +15,7 @@ console.log('Type QUIT at any time to end the program. :)');
 console.log('Type --help for a list of commands. :) Happy Coding!');
 
 // For restoring store state we only need to add Set and Delete Items to the
-// Queue.We add BEGIN to the queue so we can easily push it to the transaction stack 
+// Queue. We add BEGIN to the queue so we can easily push it to the transaction stack 
 // and handle nested rollbacks.
 // recursively prompt the user with commands until the QUIT
 // command is entered.
