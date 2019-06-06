@@ -154,5 +154,22 @@ class Store {
 
     console.log(`Rollback Complete! Transaction History Empty!`);
   }
+  
+  // informs the user of StoreJS's available commands and features.
+  logHelp() {
+    const setInstructions = 'SET <key> <value> : adds the key value pair to the store.\n';
+    const getInstructions = 'GET <key> : retrieves the value of the specified key.\n';
+    const deleteInstructions = 'DELETE <key> : deletes the key:value pair from the store.\n';
+    const commitInstructions = 'COMMIT : commits all transactions to the store.\n';
+    const beginInstructions = 'BEGIN : sets a bookmark for rollback to restore the state of the store to.\n';
+    const rollbackInstructions = 'ROLLBACK : rollsback the state of the table to a previous BEGIN.\n';
+    const countInstructions = 'COUNT <value> : returns the number of times the value occurs in the store.\n';
+    const quitInstructions = 'QUIT : kills the process and exits the program.\n';
+    const helpMessage = '\n\nHere is a list of available commands:\n' + setInstructions +
+      getInstructions + deleteInstructions + commitInstructions + beginInstructions +
+      rollbackInstructions + countInstructions + quitInstructions;
+      
+    console.log(`${helpMessage}`);
+  }
 }
 module.exports =  { Store };

@@ -9,10 +9,10 @@ const rl = require('readline').createInterface({
 });
 
 const store = new Store();
-console.log('Welcome to StoreJS, the library to meet all of your key value pair needs!');
-console.log('StoreJS uses a CLI interface with the following format: \n <command> <key> <value> \n EX: SET abc 123\n');
-console.log('Type QUIT at any time to end the program. :)');
-console.log('Type --help for a list of commands. :) Happy Coding!');
+console.log(`Welcome to StoreJS, the library to meet all of your key value pair needs!`);
+console.log(`StoreJS uses a CLI interface with the following format: \n <command> <key> <value> \n EX: SET abc 123\n`);
+console.log(`Type QUIT at any time to end the program. :)`);
+console.log(`Type --help for a list of commands. :) Happy Coding!`);
 
 // For restoring store state we only need to add Set and Delete Items to the
 // Queue. We add BEGIN to the queue so we can easily push it to the transaction stack 
@@ -25,6 +25,12 @@ const commitQueue = [];
 const main = () => {
   rl.question('What would you like to do? ', (command) => {
     const com = command.trim().split(' ');
+
+    // handles incorrect command and multiline args
+    if (com.length > 3) {
+      console.log(`ERROR: all commands take 3 arguments or less... Please try again`);
+      return main();
+    }
     let commandItem;
     if (com[0] === 'SET' || com[0] === 'DELETE') {
       commandItem = new CommandItem(com[0], com[1], com[2]);
@@ -53,18 +59,21 @@ const main = () => {
         store.rollback(commitQueue, rl);
         break;
       case 'QUIT':
-        console.log('quit');
+        console.log(`quitting StoreJS process`);
         process.exit(0);
         break;
       case 'COUNT':
         const count = store.getNumOccurences(com[1]);
         console.log(`${count}`);
         break;
+      case '--help':
+        store.logHelp();
+        break;
 
       default: 
-        console.log('Something went wrong / Incorrect Command!');
+        console.log(`Something went wrong / Incorrect Command!`);
     }
-
+    
     main();
   });
 };
