@@ -1,4 +1,3 @@
-const { CommandItem } = require('./command_item');
 
 // Store is a Key:Value Store with the ability to rollback it's state
 // using a transaction stack as a history keeper.
@@ -66,19 +65,13 @@ class Store {
           this.transactionStack.push(item);
           break;
         case 'SET':
-          //first retrieve old value if it exists
           item.setPreviousTableValue(this.getValue(item.key));
-          //push item to the transaction stack.
           this.transactionStack.push(item);
-          //commit item to table by executing command.
           this.set(item.key, item.value);
           break;
         case 'DELETE':
-          //first retrieve old value if it exists
           item.setPreviousTableValue(this.getValue(item.key));
-          //push item to the transaction stack.
           this.transactionStack.push(item);
-          //commit item to table by executing command.
           this.delete(item.key);
           break;
         

@@ -9,10 +9,9 @@ const rl = require('readline').createInterface({
 });
 
 const store = new Store();
-console.log(`Welcome to StoreJS, the library to meet all of your key value pair needs!`);
-console.log(`StoreJS uses a CLI interface with the following format: \n <command> <key> <value> \n EX: SET abc 123\n`);
+console.log(`\n\nWelcome to StoreJS, the library to meet all of your key value pair needs!`);
+console.log(`StoreJS uses a CLI interface. type --help for a list of available commands. Happy Coding! :)`);
 console.log(`Type QUIT at any time to end the program. :)`);
-console.log(`Type --help for a list of commands. :) Happy Coding!`);
 
 // For restoring store state we only need to add Set and Delete Items to the
 // Queue. We add BEGIN to the queue so we can easily push it to the transaction stack 
