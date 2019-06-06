@@ -4,7 +4,6 @@ test('Testing Store Construction Store()', () => {
   const store = new Store();
   expect(store.table).toEqual({});
   expect(store.transactionStack).toEqual([]);
-  expect(store.previousTransactionValues).toEqual([]);
 });
 
 test('Testing Store.set() : add key-value pair to table', () => {
